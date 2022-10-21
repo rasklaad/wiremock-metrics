@@ -19,7 +19,7 @@ Add dependency to your project
 <dependency>
     <groupId>com.rasklaad</groupId>
     <artifactId>wiremock-metrics</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
 </dependency>
 ```
 Add `MetricsEndpointExtension` and `PrometheusMetricsExtension` to your wiremock configuration, for example:
