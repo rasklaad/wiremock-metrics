@@ -19,7 +19,7 @@ Add dependency to your project
 <dependency>
     <groupId>com.rasklaad</groupId>
     <artifactId>wiremock-metrics</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 </dependency>
 ```
 Add `MetricsEndpointExtension` and `PrometheusMetricsExtension` to your wiremock configuration, for example:
@@ -40,7 +40,37 @@ public class Main {
     }
 }
 ```
+### Configuration
+By default all requests will be registered using path with query params. For example two requests `/hello?name=John` and `/hello?name=Jane` requests will be registered as two different requests.  
+There are various configuration parameters for changing this behaviour:
+```
+// /hello?name=John and /hello?name=Jane requests will be registered as one request
+MetricsConfiguration metricsConfiguration = PrometheusMetricsExtension.options()
+    .useRequestsUrl()
+    .ignoreQueryParams();
+
+WireMockServer server = new WireMockServer(
+WireMockConfiguration.options()
+    .port(8080)
+    .extensions(new PrometheusMetricsExtension(), new MetricsEndpointExtension(metricsConfiguration))
+);
+server.start();
+```
+  
+```
+/*
+ * wiremock stub url pattern: WireMock.urlMatching("/some-test.+")
+ * request: GET /some-test?queryParam=true&anotherParam=123
+ * metric will be registered as:
+ * wiremock_request_totalTime_ms_count{method=GET,path="/some-test.+",status=200,} 1.0
+ */
+MetricsConfiguration metricsConfiguration = PrometheusMetricsExtension.options()
+    .useMappingUrlPattern();
+```
+There are more examples in `MetricsConfigurationTest` class.
+
 ### Standalone process
+```java
 If you are running wiremock as [standalone](https://wiremock.org/docs/running-standalone/) process, you still can use this extension:
 1. Download metrics extension standalone jar from [releases](https://github.com/rasklaad/wiremock-metrics/releases/)
 2. Place it near your wiremock standalone jar
