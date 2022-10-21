@@ -9,10 +9,14 @@ import com.github.tomakehurst.wiremock.stubbing.ServeEvent;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.binder.jvm.ClassLoaderMetrics;
 import io.micrometer.core.instrument.binder.jvm.JvmGcMetrics;
+import io.micrometer.core.instrument.binder.jvm.JvmHeapPressureMetrics;
+import io.micrometer.core.instrument.binder.jvm.JvmInfoMetrics;
 import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics;
 import io.micrometer.core.instrument.binder.jvm.JvmThreadMetrics;
 import io.micrometer.core.instrument.binder.system.ProcessorMetrics;
+import io.micrometer.core.instrument.binder.system.UptimeMetrics;
 import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
 
@@ -29,7 +33,11 @@ public class PrometheusMetricsExtension extends PostServeAction {
         new JvmThreadMetrics().bindTo(registry);
         new ProcessorMetrics().bindTo(registry);
         new JvmGcMetrics().bindTo(registry);
+        new JvmInfoMetrics().bindTo(registry);
+        new JvmHeapPressureMetrics().bindTo(registry);
+        new ClassLoaderMetrics().bindTo(registry);
         new JvmMemoryMetrics().bindTo(registry);
+        new UptimeMetrics().bindTo(registry);
         configuration = MetricsConfiguration.defaultConfiguration();
     }
 
