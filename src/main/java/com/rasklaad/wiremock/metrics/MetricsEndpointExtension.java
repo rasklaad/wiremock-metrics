@@ -19,14 +19,9 @@ import java.util.stream.Collectors;
 public class MetricsEndpointExtension implements AdminApiExtension {
     public static final String EXTENSION_NAME = "metrics-endpoint-extension";
 
-    private final AdminTask adminTask;
-
-    public MetricsEndpointExtension() {
-        adminTask = new PrometheusEndpointAdminTask();
-    }
     @Override
     public void contributeAdminApiRoutes(Router router) {
-        router.add(RequestMethod.GET, "/prometheus-metrics", adminTask);
+        router.add(RequestMethod.GET, "/prometheus-metrics", new PrometheusEndpointAdminTask());
     }
 
     @Override
