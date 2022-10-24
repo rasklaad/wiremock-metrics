@@ -4,6 +4,8 @@ import com.github.tomakehurst.wiremock.common.Timing;
 import com.github.tomakehurst.wiremock.core.Admin;
 import com.github.tomakehurst.wiremock.extension.PostServeAction;
 import com.github.tomakehurst.wiremock.http.LoggedResponse;
+import com.github.tomakehurst.wiremock.matching.AnythingPattern;
+import com.github.tomakehurst.wiremock.matching.RegexPattern;
 import com.github.tomakehurst.wiremock.matching.UrlPattern;
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
@@ -83,55 +85,77 @@ public class PrometheusMetricsExtension extends PostServeAction {
 
     private void registerByUrlMapping(Timing timing, UrlPattern urlPattern, String method, String status) {
         String mappingUrlPath = urlPattern.getExpected();
-        if (configuration.shouldIgnoreQueryParams()) {
-            mappingUrlPath = URI.create(mappingUrlPath).getPath();
+        if (!(urlPattern.getPattern() instanceof RegexPattern) || !(urlPattern.getPattern() instanceof AnythingPattern)) {
+            if (configuration.shouldIgnoreQueryParams()) {
+                try {
+                    URI uri = URI.create(mappingUrlPath);
+                    mappingUrlPath = uri.getPath();
+                } catch (IllegalArgumentException e) {
+                    // can't ignore query param; fallback to mapping url
+                }
+            }
         }
         register(timing, mappingUrlPath, method, status);
-
     }
 
     private void registerByUrlPath(Timing timing, String urlPath, String method, String statusCode) {
         String path = urlPath;
         if (configuration.shouldIgnoreQueryParams()) {
-            path = URI.create(urlPath).getPath();
+            try {
+                URI uri = URI.create(path);
+                path = uri.getPath();
+            } catch (IllegalArgumentException e) {
+                // can't ignore query param; fallback to full url
+            }
         }
         register(timing, path, method, statusCode);
     }
 
     private void register(Timing timing, String path, String method, String statusCode) {
-        DistributionSummary totalTimeSummary = DistributionSummary.builder("wiremock.request.totalTime")
-            .baseUnit("ms")
-            .publishPercentiles(0.5, 0.9, 0.95, 0.99)
-            .description("Request time latency")
-            .tags("path", path, "method", method, "status", statusCode)
-            .register(Metrics.globalRegistry);
+        if (configuration.isTotalTimeMetricEnabled()) {
+            DistributionSummary totalTimeSummary = DistributionSummary.builder("wiremock.request.totalTime")
+                .baseUnit("ms")
+                .publishPercentileHistogram()
+                .maximumExpectedValue(configuration.getMaximumMetricExpectedValue())
+                .description("Request time latency")
+                .tags("path", path, "method", method, "status", statusCode)
+                .register(Metrics.globalRegistry);
+            totalTimeSummary.record(timing.getTotalTime());
+        }
 
-        DistributionSummary processingTimeSummary = DistributionSummary.builder("wiremock.request.processingTime")
-            .baseUnit("ms")
-            .publishPercentiles(0.5, 0.9, 0.95, 0.99)
-            .description("Processing time latency")
-            .tags("path", path, "method", method, "status", statusCode)
-            .register(registry);
+        if (configuration.isProcessingTimeMetricEnabled()) {
+            DistributionSummary processingTimeSummary = DistributionSummary.builder("wiremock.request.processingTime")
+                .baseUnit("ms")
+                .publishPercentileHistogram()
+                .maximumExpectedValue(configuration.getMaximumMetricExpectedValue())
+                .description("Processing time latency")
+                .tags("path", path, "method", method, "status", statusCode)
+                .register(registry);
+            processingTimeSummary.record(timing.getProcessTime());
+        }
 
+        if (configuration.isServeTimeMetricEnabled()) {
+            DistributionSummary serveTimeSummary = DistributionSummary.builder("wiremock.request.serveTime")
+                .baseUnit("ms")
+                .publishPercentileHistogram()
+                .maximumExpectedValue(configuration.getMaximumMetricExpectedValue())
+                .description("Serve time latency")
+                .tags("path", path, "method", method, "status", statusCode)
+                .register(registry);
+            serveTimeSummary.record(timing.getServeTime());
+        }
 
-        DistributionSummary serveTimeSummary = DistributionSummary.builder("wiremock.request.serveTime")
-            .baseUnit("ms")
-            .publishPercentiles(0.5, 0.9, 0.95, 0.99)
-            .description("Serve time latency")
-            .tags("path", path, "method", method, "status", statusCode)
-            .register(registry);
+        if (configuration.isResponseSendTimeEnabled()) {
+            DistributionSummary responseSendTime = DistributionSummary.builder("wiremock.request.responseSendTime")
+                .baseUnit("ms")
+                .publishPercentileHistogram()
+                .maximumExpectedValue(configuration.getMaximumMetricExpectedValue())
+                .description("Response send time latency")
+                .tags("path", path, "method", method, "status", statusCode)
+                .register(registry);
 
-        DistributionSummary responseSendTime = DistributionSummary.builder("wiremock.request.responseSendTime")
-            .baseUnit("ms")
-            .publishPercentiles(0.5, 0.9, 0.95, 0.99)
-            .description("Response send time latency")
-            .tags("path", path, "method", method, "status", statusCode)
-            .register(registry);
-
-        totalTimeSummary.record(timing.getTotalTime());
-        processingTimeSummary.record(timing.getProcessTime());
-        serveTimeSummary.record(timing.getServeTime());
-        responseSendTime.record(timing.getResponseSendTime());
+            responseSendTime.record(timing.getResponseSendTime());
+        }
     }
 
     @Override

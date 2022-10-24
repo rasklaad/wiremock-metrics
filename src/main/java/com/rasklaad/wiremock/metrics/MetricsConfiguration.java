@@ -5,10 +5,14 @@ public class MetricsConfiguration {
     private boolean useMappingUrlPattern;
     private boolean useRequestUrl;
     private boolean registerNotMatchedRequests;
-
     private boolean ignoreQueryParams;
-
     private boolean registerAnyUrlMappingAsRequestUrl;
+    private boolean totalTimeMetricEnabled = true;
+    private boolean processingTimeMetricEnabled = true;
+    private boolean serveTimeMetricEnabled = true;
+    private boolean responseSendTimeEnabled = true;
+
+    private Double maximumMetricExpectedValue;
 
     MetricsConfiguration() {
 
@@ -38,8 +42,38 @@ public class MetricsConfiguration {
         return this;
     }
 
+    public MetricsConfiguration totalTimeMetricEnabled(boolean enabled) {
+        totalTimeMetricEnabled = enabled;
+        return this;
+    }
+
+    public MetricsConfiguration processingTimeMetricEnabled(boolean enabled) {
+        processingTimeMetricEnabled = enabled;
+        return this;
+    }
+
+    public MetricsConfiguration serveTimeMetricEnabled(boolean enabled) {
+        serveTimeMetricEnabled = enabled;
+        return this;
+    }
+
+    public MetricsConfiguration responseSendTimeEnabled(boolean enabled) {
+        responseSendTimeEnabled = enabled;
+        return this;
+    }
+
+    public MetricsConfiguration maximumMetricExpectedValue(Double maximumMetricExpectedValue) {
+        this.maximumMetricExpectedValue = maximumMetricExpectedValue;
+        return this;
+    }
+
     static MetricsConfiguration defaultConfiguration() {
-        return new MetricsConfiguration().useRequestUrl();
+        return new MetricsConfiguration()
+            .totalTimeMetricEnabled(true)
+            .processingTimeMetricEnabled(true)
+            .serveTimeMetricEnabled(true)
+            .responseSendTimeEnabled(true)
+            .useRequestUrl();
     }
 
     void validate() {
@@ -68,5 +102,25 @@ public class MetricsConfiguration {
 
     boolean shouldIgnoreQueryParams() {
         return ignoreQueryParams;
+    }
+
+    boolean isTotalTimeMetricEnabled() {
+        return totalTimeMetricEnabled;
+    }
+
+    boolean isProcessingTimeMetricEnabled() {
+        return processingTimeMetricEnabled;
+    }
+
+    boolean isServeTimeMetricEnabled() {
+        return serveTimeMetricEnabled;
+    }
+
+    boolean isResponseSendTimeEnabled() {
+        return responseSendTimeEnabled;
+    }
+
+    Double getMaximumMetricExpectedValue() {
+        return maximumMetricExpectedValue;
     }
 }
