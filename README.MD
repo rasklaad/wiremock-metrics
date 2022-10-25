@@ -70,8 +70,7 @@ MetricsConfiguration metricsConfiguration = PrometheusMetricsExtension.options()
 There are more examples in `MetricsConfigurationTest` class.
 
 ### Standalone process
-```java
-If you are running wiremock as [standalone](https://wiremock.org/docs/running-standalone/) process, you still can use this extension:
+If you are running wiremock as [standalone](https://wiremock.org/docs/running-standalone) process, you still can use this extension:
 1. Download metrics extension standalone jar from [releases](https://github.com/rasklaad/wiremock-metrics/releases/)
 2. Place it near your wiremock standalone jar
 3. Run via command line: `java -cp './*' com.github.tomakehurst.wiremock.standalone.WireMockServerRunner --extensions com.rasklaad.wiremock.metrics.MetricsEndpointExtension,com.rasklaad.wiremock.metrics.PrometheusMetricsExtension` (both wiremock jar and extension jar need to be in current folder)
