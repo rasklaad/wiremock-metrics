@@ -2,12 +2,13 @@ package com.rasklaad.wiremock.metrics;
 
 import com.github.tomakehurst.wiremock.admin.AdminTask;
 import com.github.tomakehurst.wiremock.admin.Router;
-import com.github.tomakehurst.wiremock.admin.model.PathParams;
+import com.github.tomakehurst.wiremock.common.url.PathParams;
 import com.github.tomakehurst.wiremock.core.Admin;
 import com.github.tomakehurst.wiremock.extension.AdminApiExtension;
-import com.github.tomakehurst.wiremock.http.Request;
 import com.github.tomakehurst.wiremock.http.RequestMethod;
 import com.github.tomakehurst.wiremock.http.ResponseDefinition;
+import com.github.tomakehurst.wiremock.stubbing.ServeEvent;
+
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
@@ -29,7 +30,7 @@ public class MetricsEndpointExtension implements AdminApiExtension {
         return EXTENSION_NAME;
     }
 
-    private final static class PrometheusEndpointAdminTask implements AdminTask {
+    private class PrometheusEndpointAdminTask implements AdminTask {
 
         private final PrometheusMeterRegistry prometheusMeterRegistry;
 
@@ -45,7 +46,7 @@ public class MetricsEndpointExtension implements AdminApiExtension {
         }
 
         @Override
-        public ResponseDefinition execute(Admin admin, Request request, PathParams pathParams) {
+        public ResponseDefinition execute(Admin admin, ServeEvent event, PathParams pathParams) {
             return new ResponseDefinition(HttpURLConnection.HTTP_OK, prometheusMeterRegistry.scrape());
         }
     }
