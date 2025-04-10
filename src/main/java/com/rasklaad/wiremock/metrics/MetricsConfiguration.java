@@ -13,6 +13,7 @@ public class MetricsConfiguration {
     private boolean responseSendTimeEnabled = true;
 
     private Double maximumMetricExpectedValue;
+    private Double minimumMetricExpectedValue;
 
     MetricsConfiguration() {
 
@@ -67,12 +68,20 @@ public class MetricsConfiguration {
         return this;
     }
 
+    public MetricsConfiguration minimumMetricExpectedValue(Double minimumMetricExpectedValue) {
+        this.minimumMetricExpectedValue = minimumMetricExpectedValue;
+        return this;
+    }
+
     static MetricsConfiguration defaultConfiguration() {
         return new MetricsConfiguration()
             .totalTimeMetricEnabled(true)
             .processingTimeMetricEnabled(true)
             .serveTimeMetricEnabled(true)
             .responseSendTimeEnabled(true)
+            .registerNotMatchedRequests()
+            .minimumMetricExpectedValue(1d)
+            .maximumMetricExpectedValue(5000d)
             .useRequestUrl();
     }
 
@@ -122,5 +131,9 @@ public class MetricsConfiguration {
 
     Double getMaximumMetricExpectedValue() {
         return maximumMetricExpectedValue;
+    }
+    
+    Double getMinimumMetricExpectedValue() {
+        return minimumMetricExpectedValue;
     }
 }
