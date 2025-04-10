@@ -1,8 +1,8 @@
 package com.rasklaad.wiremock.metrics;
 
 import com.github.tomakehurst.wiremock.common.Timing;
-import com.github.tomakehurst.wiremock.core.Admin;
-import com.github.tomakehurst.wiremock.extension.PostServeAction;
+import com.github.tomakehurst.wiremock.extension.Parameters;
+import com.github.tomakehurst.wiremock.extension.ServeEventListener;
 import com.github.tomakehurst.wiremock.http.LoggedResponse;
 import com.github.tomakehurst.wiremock.matching.AnythingPattern;
 import com.github.tomakehurst.wiremock.matching.RegexPattern;
@@ -24,7 +24,7 @@ import io.micrometer.prometheus.PrometheusMeterRegistry;
 
 import java.net.URI;
 
-public class PrometheusMetricsExtension extends PostServeAction {
+public class PrometheusMetricsExtension implements ServeEventListener {
     public static final String EXTENSION_NAME = "prometheus-metrics-extension";
     private final PrometheusMeterRegistry registry;
     private MetricsConfiguration configuration;
@@ -50,8 +50,7 @@ public class PrometheusMetricsExtension extends PostServeAction {
     }
 
     @Override
-    public void doGlobalAction(ServeEvent serveEvent, Admin admin) {
-        super.doGlobalAction(serveEvent, admin);
+    public void afterComplete(ServeEvent serveEvent, Parameters parameters) {
         Timing timing = serveEvent.getTiming();
         LoggedRequest request = serveEvent.getRequest();
         LoggedResponse response = serveEvent.getResponse();
