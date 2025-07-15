@@ -6,7 +6,7 @@
 
     <groupId>com.rasklaad</groupId>
     <artifactId>wiremock-metrics</artifactId>
-    <version>1.0.3</version>
+    <version>1.0.4</version>
     <name>wiremock-metrics</name>
     <description>Metrics extension for standalone wiremock</description>
     <url>https://github.com/rasklaad/wiremock-metrics</url>
@@ -203,9 +203,9 @@
             <version>1.9.5</version>
         </dependency>
         <dependency>
-            <groupId>com.github.tomakehurst</groupId>
-            <artifactId>wiremock-jre8</artifactId>
-            <version>2.34.0</version>
+            <groupId>org.wiremock</groupId>
+            <artifactId>wiremock-standalone</artifactId>
+            <version>3.13.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
